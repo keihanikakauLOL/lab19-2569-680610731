@@ -22,11 +22,20 @@ import enrollmentRouter_v3 from "./routes/enrollmentsRouters_v3.ts";
 const app = express();
 const port = process.env.PORT || 3000;
 
-// CORS middleware: อนุญาตให้ Frontend (Vite dev server คนละ origin) เรียก API ได้
-// ตั้งค่า origin ได้หลายค่าคั่นด้วย "," ผ่าน CORS_ORIGIN ใน .env
+// Configure exact frontend origins; multiple values can be comma-separated.
+const configuredCorsOrigins = process.env.CORS_ORIGIN?.split(",")
+  .map((origin) => origin.trim().replace(/\/+$/, ""))
+  .filter(Boolean);
+const corsOrigins =
+  configuredCorsOrigins && configuredCorsOrigins.length > 0
+    ? configuredCorsOrigins
+    : process.env.NODE_ENV === "production"
+      ? []
+      : ["http://localhost:5173"];
+
 app.use(
   cors({
-    origin: (process.env.CORS_ORIGIN || "http://localhost:5173").split(","),
+    origin: "http://localhost:5173",
   }),
 );
 
@@ -50,9 +59,9 @@ app.get("/me", (req: Request, res: Response) => {
     success: true,
     message: "Student Information",
     data: {
-      studentId: "600610999",
-      firstName: "Dome",
-      lastName: "Potikanond",
+      studentId: "680610731",
+      firstName: "Ananda",
+      lastName: "Nantana",
       program: "CPE",
       section: "001",
     },
@@ -69,9 +78,12 @@ app.use("/api/v3/enrollments", enrollmentRouter_v3);
 // endpoint check middleware
 app.use(notFoundMiddleware);
 
-app.listen(port, () => {
-  console.log(`🚀 Server running on http://localhost:${port}`);
-});
+// ถ้าไม่ใช่บน Vercel (รันโลคัล) ถึงค่อยเรียก app.listen
+if (process.env.NODE_ENV !== "production") {
+  app.listen(port, () => {
+    console.log(`🚀 Server running on http://localhost:${port}`);
+  });
+}
 
 // Export app for vercel deployment
 export default app;

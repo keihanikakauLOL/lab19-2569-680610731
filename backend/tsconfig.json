@@ -6,6 +6,7 @@
   "compilerOptions": {
     "rootDir": ".",
     "outDir": "./dist",
+    "types": ["node"],
     "paths": {
       "@src/*": ["./src/*"],
       "@db/*": ["./src/db/*"],
